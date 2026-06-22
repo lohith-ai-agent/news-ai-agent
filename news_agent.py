@@ -4,7 +4,7 @@ import schedule
 import time
 
 import os
-  WEBHOOK_URL=os.getenv("SLACK_WEBHOOK_URL")
+WEBHOOK_URL=os.getenv("SLACK_WEBHOOK_URL")
 
 rss_feeds = [
     "https://news.google.com/rss/search?q=world+news",
