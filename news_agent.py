@@ -1,9 +1,13 @@
 import feedparser
 import requests
 import os
+from openai import OpenAI
 
-# Get Slack webhook from GitHub Secrets
+# API Keys
 WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 rss_feeds = {
     "🛡 DEFENCE": [
@@ -28,6 +32,20 @@ rss_feeds = {
     ]
 }
 
+def summarize(text):
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Summarize the news in 1 simple sentence for exam preparation."},
+                {"role": "user", "content": text}
+            ]
+        )
+        return response.choices[0].message.content.strip()
+    except:
+        return text  # fallback
+
+
 def get_news():
     categorized_news = {}
 
@@ -37,15 +55,16 @@ def get_news():
         for url in urls:
             feed = feedparser.parse(url)
 
-            for entry in feed.entries[:3]:  # limit per category
-                news = f"• {entry.title}\n{entry.link}"
+            for entry in feed.entries[:2]:  # reduce due to API usage
+                summary = summarize(entry.title)
+                news = f"• {summary}\n{entry.link}"
                 categorized_news[category].append(news)
 
     return categorized_news
 
 
 def format_message(news_dict):
-    message = "🔥 *3-Hour News Update*\n\n"
+    message = "🔥 *AI Powered 3-Hour News Update*\n\n"
 
     for category, news_list in news_dict.items():
         if news_list:
@@ -58,25 +77,24 @@ def format_message(news_dict):
 
 def send_to_slack(message):
     if not WEBHOOK_URL:
-        print("❌ ERROR: Slack Webhook URL not found")
+        print("❌ Slack Webhook Missing")
         return
 
     payload = {"text": message}
     response = requests.post(WEBHOOK_URL, json=payload)
 
     if response.status_code == 200:
-        print("✅ Message sent to Slack successfully")
+        print("✅ Sent to Slack")
     else:
-        print("❌ Error sending message:", response.text)
+        print("❌ Error:", response.text)
 
 
 def job():
-    print("🚀 Running News Agent...")
+    print("🚀 Running AI News Agent...")
     news = get_news()
     message = format_message(news)
     send_to_slack(message)
 
 
-# IMPORTANT: This makes script run in GitHub Actions
 if __name__ == "__main__":
     job()
