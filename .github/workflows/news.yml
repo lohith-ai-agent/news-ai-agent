@@ -1,12 +1,12 @@
-name: News Agent
+name: Run News Agent
 
 on:
   schedule:
-    - cron: "0 */3 * * *"   # every 3 hours
-  workflow_dispatch:        # manual run button
+    - cron: "0 */3 * * *"
+  workflow_dispatch:
 
 jobs:
-  run-news-agent:
+  run-news:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,13 +16,15 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install dependencies ✅ (FIXED)
         run: |
-          pip install feedparser requests
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run script
         env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: python news_agent.py
