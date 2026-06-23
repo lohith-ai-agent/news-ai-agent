@@ -64,13 +64,3 @@ def job():
     news = get_news()
     message = format_message(news)
     send_to_slack(message)
-
-
-# Run every 3 hours
-schedule.every(3).hours.do(job)
-
-print("🚀 Categorized AI News Agent Running...")
-
-while True:
-    schedule.run_pending()
-    time.sleep(60)
