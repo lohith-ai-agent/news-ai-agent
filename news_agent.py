@@ -2,6 +2,7 @@ import feedparser
 import requests
 import os
 
+# Get Slack webhook from GitHub Secrets
 WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
 
 rss_feeds = {
@@ -56,11 +57,26 @@ def format_message(news_dict):
 
 
 def send_to_slack(message):
+    if not WEBHOOK_URL:
+        print("❌ ERROR: Slack Webhook URL not found")
+        return
+
     payload = {"text": message}
-    requests.post(WEBHOOK_URL, json=payload)
+    response = requests.post(WEBHOOK_URL, json=payload)
+
+    if response.status_code == 200:
+        print("✅ Message sent to Slack successfully")
+    else:
+        print("❌ Error sending message:", response.text)
 
 
 def job():
+    print("🚀 Running News Agent...")
     news = get_news()
     message = format_message(news)
     send_to_slack(message)
+
+
+# IMPORTANT: This makes script run in GitHub Actions
+if __name__ == "__main__":
+    job()
