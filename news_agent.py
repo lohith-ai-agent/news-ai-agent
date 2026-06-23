@@ -1,7 +1,6 @@
 import feedparser
 import requests
-import schedule
-import time
+
 
 import os
 WEBHOOK_URL=os.getenv("SLACK_WEBHOOK_URL")
@@ -39,11 +38,3 @@ def job():
     send_to_slack(news)
 
 job()
-# Run every 3 hours
-schedule.every(3).hours.do(job)
-
-print("Agent running...")
-
-while True:
-    schedule.run_pending()
-    time.sleep(60)
