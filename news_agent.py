@@ -1,7 +1,5 @@
 import feedparser
 import requests
-import schedule
-import time
 import os
 
 WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
